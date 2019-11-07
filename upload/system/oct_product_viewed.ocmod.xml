@@ -17,7 +17,7 @@
     </file>
 
     <!-- oct_popup_view -->
-    <file path="catalog/controller/octemplates/module/oct_product_viewed.php">
+    <file path="catalog/controller/extension/module/oct_product_viewed.php">
         <operation error="skip">
             <search><![CDATA[$this->load->language('extension/module/oct_product_viewed');]]></search>
             <add position="before"><![CDATA[
@@ -42,7 +42,7 @@
     <!-- END oct_popup_view -->
 
     <!-- oct_stickers -->
-    <file path="catalog/controller/octemplates/module/oct_product_viewed.php">
+    <file path="catalog/controller/extension/module/oct_product_viewed.php">
         <operation>
             <search><![CDATA[foreach ($products as $product_id) {]]></search>
             <add position="before"><![CDATA[
@@ -148,7 +148,7 @@
     <!-- END oct_stickers -->
 
     <!-- oct_product_preorder -->
-    <file path="catalog/controller/octemplates/module/oct_product_viewed.php">
+    <file path="catalog/controller/extension/module/oct_product_viewed.php">
         <operation>
             <search><![CDATA[$data['products'][] = array(]]></search>
             <add position="before"><![CDATA[

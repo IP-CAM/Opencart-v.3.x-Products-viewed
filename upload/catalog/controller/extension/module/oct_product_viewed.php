@@ -1,6 +1,6 @@
 <?php
 
-class ControllerOctemplatesModuleOctProductViewed extends Controller {
+class ControllerExtensionModuleOctProductViewed extends Controller {
     public function index($setting) {
         static $module = 0;
 
