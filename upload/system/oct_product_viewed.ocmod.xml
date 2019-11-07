@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <code>oct_product_viewed</code>
+    <name>Octemplates - Recently Viewed Products</name>
+    <version>1.0.0</version>
+    <author>eapdob</author>
+    <link>eapdob@gmail.com</link>
+    <file path="catalog/controller/product/product.php">
+        <operation>
+            <search><![CDATA[$this->model_catalog_product->updateViewed($this->request->get['product_id']);]]></search>
+            <add position="after"><![CDATA[
+                // oct_product_viewed start
+                $this->session->data['oct_product_viewed'][] = $this->request->get['product_id'];
+                // oct_product_viewed end
+            ]]></add>
+        </operation>
+    </file>
+
+    <!-- oct_popup_view -->
+    <file path="catalog/controller/octemplates/module/oct_product_viewed.php">
+        <operation error="skip">
+            <search><![CDATA[$this->load->language('extension/module/oct_product_viewed');]]></search>
+            <add position="before"><![CDATA[
+                    // oct_popup_view
+                    $data['oct_popup_view_status'] = $this->config->get('oct_popup_view_status');
+                    // END oct_popup_view
+                ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/oct_ultrastore/template/octemplates/module/oct_product_viewed.twig">
+        <operation error="skip">
+            <search><![CDATA[<a href="javascript:void(0);" class="us-module-buttons-link us-module-buttons-compare" title="{{ button_compare }}" onclick="compare.add('{{ product.product_id }}');"><i class="fas fa-sliders-h"></i></a>]]></search>
+            <add position="after" offset="1"><![CDATA[
+                {% if oct_popup_view_status and product.quantity > 0 %}
+                    <li class="us-module-buttons-item">
+                        <a href="javascript:void(0);" class="us-module-buttons-link us-module-buttons-quickview" title="Быстрый просмотр" onclick="octPopUpView('{{ product.product_id }}')"><i class="far fa-eye"></i></a>
+                    </li>
+                {% endif %}
+            ]]></add>
+        </operation>
+    </file>
+    <!-- END oct_popup_view -->
+
+    <!-- oct_stickers -->
+    <file path="catalog/controller/octemplates/module/oct_product_viewed.php">
+        <operation>
+            <search><![CDATA[foreach ($products as $product_id) {]]></search>
+            <add position="before"><![CDATA[
+                // oct_stickers
+                $oct_product_stickers = [];
+                $data['sticker_colors'] = [];
+
+                if ($this->config->get('oct_stickers_status')) {
+                    $oct_stickers = $this->config->get('oct_stickers_data');
+
+                    $data['oct_sticker_you_save'] = false;
+
+                    if ($oct_stickers) {
+                        $data['oct_sticker_you_save'] = isset($oct_stickers['stickers']['special']['persent']) ? true : false;
+                    }
+
+                    $this->load->model('octemplates/stickers/oct_stickers');
+                }
+                // END oct_stickers
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[if ($product_info) {]]></search>
+            <add position="after"><![CDATA[
+                // oct_stickers
+                if (isset($oct_stickers)) {
+                    $oct_stickers_data = $this->model_octemplates_stickers_oct_stickers->getOCTStickers($product_info);
+
+                    $oct_product_stickers = [];
+
+                    if ($oct_stickers_data) {
+                        $oct_product_stickers = $oct_stickers_data['stickers'];
+                        $data['sticker_colors'][] = $oct_stickers_data['sticker_colors'];
+                    }
+                }
+                // END oct_stickers
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA['product_id' => $product_info['product_id'],]]></search>
+            <add position="after"><![CDATA[
+                // oct_stickers
+                'oct_stickers'  => $oct_product_stickers,
+                'you_save'  	=> $product_info['you_save'],
+                // END oct_stickers
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[if ($data['products']) {]]></search>
+            <add position="after"><![CDATA[
+                // oct_stickers
+                if ($data['sticker_colors']) {
+                    $oct_color_stickers = [];
+
+                    foreach ($data['sticker_colors'] as $sticker_colors) {
+                        foreach ($sticker_colors as $key=>$sticker_color) {
+                            $oct_color_stickers[$key] = $sticker_color;
+                        }
+                    }
+
+                    $data['sticker_colors'] = $oct_color_stickers;
+                }
+                // END oct_stickers
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/oct_ultrastore/template/octemplates/module/oct_product_viewed.twig">
+        <operation>
+            <search><![CDATA[<ul class="us-module-buttons-list">]]></search>
+            <add position="before"><![CDATA[
+			{% if product.oct_stickers is not empty%}
+			<div class="us-module-stickers">
+				{% if oct_sticker_you_save and product.you_save %}
+					<div class="us-module-stickers-sticker us-module-stickers-sticker-discount">{{ product.you_save }}</div>
+				{% endif %}
+				{% for key, oct_sticker in product.oct_stickers %}
+					{% if oct_sticker is not empty %}
+					<div class="us-module-stickers-sticker us-module-stickers-sticker-{{ key }}">
+						{{ oct_sticker }}
+					</div>
+					{% endif %}
+				{% endfor %}
+			</div>
+			{% endif %}
+			]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[{% for product in products %}]]></search>
+            <add position="before"><![CDATA[
+			{% if sticker_colors is not empty %}
+				<style>
+					{% for key, sticker_color in sticker_colors %}
+					.us-module-stickers-sticker-{{ key }} {
+						color:{{ sticker_color.text_color }};
+						background:{{ sticker_color.fon_color }};
+					}
+					{% endfor %}
+				</style>
+			{% endif %}
+			]]></add>
+        </operation>
+    </file>
+    <!-- END oct_stickers -->
+
+    <!-- oct_product_preorder -->
+    <file path="catalog/controller/octemplates/module/oct_product_viewed.php">
+        <operation>
+            <search><![CDATA[$data['products'][] = array(]]></search>
+            <add position="before"><![CDATA[
+                // oct_product_preorder
+                $oct_product_preorder_text = $this->config->get('oct_product_preorder_text');
+                $oct_product_preorder_data = $this->config->get('oct_product_preorder_data');
+                $oct_product_preorder_language = $this->load->language('octemplates/module/oct_product_preorder');
+
+                if (isset($oct_product_preorder_data['status']) && $oct_product_preorder_data['status'] && isset($oct_product_preorder_data['stock_statuses']) && isset($product_info['oct_stock_status_id']) && in_array($product_info['oct_stock_status_id'], $oct_product_preorder_data['stock_statuses'])) {
+                    $product_preorder_text = $oct_product_preorder_text[$this->session->data['language']]['call_button'];
+                    $product_preorder_status = 1;
+                } else {
+                    $product_preorder_text = $oct_product_preorder_language['text_out_of_stock'];
+                    $product_preorder_status = 2;
+                }
+                // END oct_product_preorder
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA['price' => $price,]]></search>
+            <add position="before"><![CDATA[
+                // oct_product_preorder
+                'product_preorder_text' => $product_preorder_text,
+                'product_preorder_status' => $product_preorder_status,
+                // END oct_product_preorder
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/oct_ultrastore/template/octemplates/module/oct_product_viewed.twig">
+        <operation error="skip">
+            <search><![CDATA[<a href="javascript:void(0);" onclick="cart.add('{{ product.product_id }}');" class="us-module-cart-btn button-cart">{{ button_cart }}</a>]]></search>
+            <add position="replace"><![CDATA[<a href="{% if (product.product_preorder_status == 1 or product.product_preorder_status == 2) and product.quantity > 0 %}javascript:void(0);{% else %}{{ product.href }}{% endif %}"{% if product.quantity > 0 %} onclick="cart.add('{{ product.product_id }}');"{% elseif (product.product_preorder_status == 1 or product.product_preorder_status == 2) and product.quantity <= 0 %} onclick="get_oct_product_preorder('{{ product.product_id }}');"{% else %}{% endif %} class="us-module-cart-btn button-cart">{{ ((product.product_preorder_status == 1 or product.product_preorder_status == 2) and quantity <= 0) ? product.product_preorder_text : button_cart }}</a>]]></add>
+        </operation>
+    </file>
+    <!-- END oct_product_preorder -->
+</modification>
